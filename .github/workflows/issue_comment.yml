@@ -1,0 +1,20 @@
+name: "Learning GitHub Script"
+# Add a thank you message when issues are opened
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  comment:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@0.8.0
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            github.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: "Thank you for opening an issue! I'll work on it ASAP🥳"
+            })

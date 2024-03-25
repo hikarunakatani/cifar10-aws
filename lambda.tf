@@ -37,18 +37,18 @@ resource "aws_iam_role" "lambda_execution_role" {
 # Lambda source 
 data "archive_file" "lambda" {
   type        = "zip"
-  source_file = "./lambda/invoke_task.py"
+  source_file = "./lambda/index.py"
   output_path = "lambda_function.zip"
 }
 
-# Lmbda function
+# Lambda function
 resource "aws_lambda_function" "ecs_task_invoke" {
   # If the file is not in the current working directory you will need to include a
   # path.module in the filename.
   filename         = "lambda-function.zip"
   function_name    = "${var.project_name}-invoke-task"
   role             = aws_iam_role.lambda_execution_role.arn
-  handler          = "index.handler"
+  handler          = "index.lambda_handler"
   source_code_hash = data.archive_file.lambda.output_base64sha256
   runtime          = "python3.6"
 }

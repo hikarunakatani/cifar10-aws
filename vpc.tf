@@ -20,6 +20,7 @@ resource "aws_subnet" "private1a" {
 resource "aws_vpc_endpoint" "s3" {
   vpc_id       = aws_vpc.main.id
   service_name = "com.amazonaws.${var.aws_region}.s3"
+  security_group_ids  = [aws_security_group.vpc_endpoint.id]
 }
 
 # Route Table

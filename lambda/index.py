@@ -4,6 +4,7 @@ import logging
 import os
 import sys
 
+# Setting up logging
 logger = logging.getLogger()
 for h in logger.handlers:
     logger.removeHandler(h)
@@ -13,10 +14,24 @@ h.setFormatter(logging.Formatter(FORMAT))
 logger.addHandler(h)
 logger.setLevel(logging.INFO)
 
+# Creating an ECS client
 ecs = boto3.client("ecs")
 
 
 def run_ecs_task(cluster, task_definition, subnets, security_groups, payload):
+    """
+    Function to run an ECS task.
+
+    Parameters:
+    cluster (str): The name of the ECS cluster.
+    task_definition (str): The ARN of the task definition.
+    subnets (str): The subnets for the task.
+    security_groups (str): The security groups for the task.
+    payload (dict): The payload for the task.
+
+    Returns:
+    None
+    """
     try:
         response = ecs.run_task(
             cluster=cluster,
@@ -51,6 +66,16 @@ def run_ecs_task(cluster, task_definition, subnets, security_groups, payload):
 
 
 def lambda_handler(event, context):
+    """
+    AWS Lambda function handler.
+
+    Parameters:
+    event (dict): The event data passed by AWS Lambda service.
+    context (LambdaContext): The context data passed by AWS Lambda service.
+
+    Returns:
+    None
+    """
     try:
         ECS_CLUSTER = os.environ["ECS_CLUSTER"]
         TASK_DEFINITION_ARN = os.environ["TASK_DEFINITION_ARN"]

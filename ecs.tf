@@ -82,25 +82,23 @@ resource "aws_iam_role" "myservice_task" {
 resource "aws_ecs_task_definition" "service" {
   family                   = "${var.project_name}-task"
   requires_compatibilities = ["FARGATE"]
-  runtime_platform {
-    operating_system_family = "LINUX"
-    cpu_architecture        = "X86_64"
-  }
-  network_mode       = "awsvpc"
-  cpu                = 1024
-  memory             = 3072
-  task_role_arn      = aws_iam_role.myservice_task.arn
-  execution_role_arn = aws_iam_role.ecs_task_exec.arn
+  network_mode             = "awsvpc"
+  cpu                      = "2048" # 2 vCPU
+  memory                   = "8192" # 8GB RAM
+  task_role_arn            = aws_iam_role.myservice_task.arn
+  execution_role_arn       = aws_iam_role.ecs_task_exec.arn
+
   container_definitions = jsonencode([
     {
       name      = "${var.project_name}-container"
       image     = "${aws_ecr_repository.main.repository_url}:latest"
-      cpu       = 1024
-      memory    = 2048
+      cpu       = 2048
+      memory    = 4098
       essential = true
       portMappings = [
         {
-          containerPort = 80
+          "containerPort" : 80,
+          "hostPort" : 80
         }
       ],
       mountPoints = [

@@ -62,7 +62,7 @@ resource "aws_iam_role" "myservice_task" {
     name = "allow_logs"
     policy = jsonencode({
       Version = "2012-10-17"
-      Statement = [
+      Stratement = [
         {
           Effect = "Allow"
           Action = [
@@ -94,7 +94,7 @@ resource "aws_ecs_task_definition" "service" {
   container_definitions = jsonencode([
     {
       name      = "${var.project_name}-container"
-      image     = "${var.ecr_repository_url}:${var.image_tag}"
+      image     = "${aws_ecr_repository.main.repository_url}:latest"
       cpu       = 1024
       memory    = 2048
       essential = true

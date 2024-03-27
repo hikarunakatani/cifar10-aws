@@ -13,7 +13,7 @@ resource "aws_cloudwatch_event_rule" "ecr_push_rule" {
 resource "aws_cloudwatch_event_target" "ecr_push_target" {
   rule      = aws_cloudwatch_event_rule.ecr_push_rule.name
   target_id = "run-index-py-function"
-  arn       = aws_lambda_function.index_py.arn
+  arn       = aws_lambda_function.ecs_task_invoke.arn
 }
 
 

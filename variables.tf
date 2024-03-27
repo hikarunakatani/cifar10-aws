@@ -20,12 +20,12 @@ variable "project_name" {
   description = "Project name."
 }
 
-variable "ecr_repository_url" {
-  type        = string
-  description = "URL of ECR repository."
-}
+# variable "ecr_repository_url" {
+#   type        = string
+#   description = "URL of ECR repository."
+# }
 
-variable "image_tag" {
-  type        = string
-  description = "The tag of the Docker image"
-}
+# variable "image_tag" {
+#   type        = string
+#   description = "The tag of the Docker image"
+# }

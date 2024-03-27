@@ -7,7 +7,7 @@ resource "aws_security_group" "ecs" {
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
-    security_groups = [aws_security_group.vpc_endpoint]
+    security_groups = [aws_security_group.vpc_endpoint.id]
   }
 }
 

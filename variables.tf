@@ -2,6 +2,12 @@ provider "aws" {
   region = "ap-northeast-1"
 }
 
+data "aws_caller_identity" "self" {}
+
+output "account_id" {
+  value = data.aws_caller_identity.self.account_id
+}
+
 variable "aws_region" {
   type        = string
   default     = "ap-northeast-1"
@@ -18,14 +24,4 @@ variable "project_name" {
   type        = string
   default     = "cifar10-mlops"
   description = "Project name."
-}
-
-variable "ecr_repository_url" {
-  type        = string
-  description = "URL of ECR repository."
-}
-
-variable "image_tag" {
-  type        = string
-  description = "The tag of the Docker image"
 }

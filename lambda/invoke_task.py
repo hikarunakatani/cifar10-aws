@@ -1,34 +1,97 @@
+import json
+import logging
+import os
+import sys
 import boto3
 
-def invoke_ecs_task():
-    # Function to invoke ECS task
-    ecs_client = boto3.client('ecs')
+# Setting up logging
+logger = logging.getLogger()
+for h in logger.handlers:
+    logger.removeHandler(h)
+h = logging.StreamHandler(sys.stdout)
+FORMAT = "%(levelname)s [%(funcName)s] %(message)s"
+h.setFormatter(logging.Formatter(FORMAT))
+logger.addHandler(h)
+logger.setLevel(logging.INFO)
 
-    # ECS task definition
+# Creating an ECS client
+ecs = boto3.client("ecs")
 
-    name_prefix = 'cifar10-mlops'
-    task_definition = name_prefix + '-task-definition'  
-    cluster = name_prefix + '-cluster'  
-    subnet = name_prefix + '-subnet-private-ap-northeast-1'  
-    security_group = name_prefix + 'ecs-securitygroup'
 
-    # Invoke ECS task
-    response = ecs_client.run_task(
-        cluster=cluster,
-        taskDefinition=task_definition,
-        launchType='FARGATE',
-        networkConfiguration={
-            'awsvpcConfiguration': {
-                'subnets': [
-                    subnet
-                ],
-                'securityGroups': [
-                    security_group
-                ],
-                'assignPublicIp': 'ENABLED'
-            }
-        }
-    )
+def run_ecs_task(cluster, task_definition, subnets, security_groups, payload):
+    """
+    Function to run an ECS task.
 
-    # Display task info
-    print(response)
+    Parameters:
+    cluster (str): The name of the ECS cluster.
+    task_definition (str): The ARN of the task definition.
+    subnets (str): The subnets for the task.
+    security_groups (str): The security groups for the task.
+    payload (dict): The payload for the task.
+
+    Returns:
+    None
+    """
+    try:
+        response = ecs.run_task(
+            cluster=cluster,
+            taskDefinition=task_definition,
+            launchType="FARGATE",
+            networkConfiguration={
+                "awsvpcConfiguration": {
+                    "subnets": subnets.split(","),
+                    "securityGroups": security_groups.split(","),
+                    "assignPublicIp": "ENABLED",
+                }
+            },
+            overrides={
+                "containerOverrides": [
+                    {
+                        "name": "sample-ecr-dev",
+                        "command": ["python", "sample.py"],
+                        "memory": 128,
+                        "environment": [
+                            {"name": "PARAMS", "value": json.dumps(payload)}
+                        ],
+                    }
+                ]
+            },
+        )
+        logger.info(f"Response: {response}")
+        failures = response.get("failures", [])
+        if failures:
+            logger.error(f"Task failures: {failures}")
+    except Exception as e:
+        logger.error(f"Error running ECS task: {e}")
+
+
+def lambda_handler(event, context):
+    """
+    AWS Lambda function handler.
+
+    Parameters:
+    event (dict): The event data passed by AWS Lambda service.
+    context (LambdaContext): The context data passed by AWS Lambda service.
+
+    Returns:
+    None
+    """
+    try:
+        ECS_CLUSTER = os.environ["ECS_CLUSTER"]
+        TASK_DEFINITION_ARN = os.environ["TASK_DEFINITION_ARN"]
+        AWSVPC_CONF_SUBNETS = os.environ["AWSVPC_CONF_SUBNETS"]
+        AWSVPC_CONF_SECURITY_GROUPS = os.environ["AWSVPC_CONF_SECURITY_GROUPS"]
+
+        for record in event["Records"]:
+            payload = json.loads(record["body"])
+            logger.info(f"ECS_CLUSTER: {ECS_CLUSTER}")
+            logger.info(f"TASK_DEFINITION_ARN: {TASK_DEFINITION_ARN}")
+            run_ecs_task(
+                ECS_CLUSTER,
+                TASK_DEFINITION_ARN,
+                AWSVPC_CONF_SUBNETS,
+                AWSVPC_CONF_SECURITY_GROUPS,
+                payload,
+            )
+    except Exception as e:
+        logger.error(f"Lambda handler error: {e}")

@@ -46,8 +46,8 @@ resource "aws_cloudwatch_log_group" "main" {
   name = "${var.project_name}-log-group"
 }
 
-resource "aws_iam_role" "myservice_task" {
-  name = "myservice_task"
+resource "aws_iam_role" "ecs_task_role" {
+  name = "ecs_task_role"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -82,34 +82,31 @@ resource "aws_iam_role" "myservice_task" {
 resource "aws_ecs_task_definition" "service" {
   family                   = "${var.project_name}-task"
   requires_compatibilities = ["FARGATE"]
-  runtime_platform {
-    operating_system_family = "LINUX"
-    cpu_architecture        = "X86_64"
-  }
-  network_mode       = "awsvpc"
-  cpu                = 1024
-  memory             = 3072
-  task_role_arn      = aws_iam_role.myservice_task.arn
-  execution_role_arn = aws_iam_role.ecs_task_exec.arn
+  network_mode             = "awsvpc"
+  cpu                      = "2048" # 2 vCPU
+  memory                   = "8192" # 8GB RAM
+  task_role_arn            = aws_iam_role.ecs_task_role.arn
+  execution_role_arn       = aws_iam_role.ecs_task_exec.arn
+
   container_definitions = jsonencode([
     {
       name      = "${var.project_name}-container"
-      image     = "${var.ecr_repository_url}:${var.image_tag}"
-      cpu       = 1024
-      memory    = 2048
+      image     = "${aws_ecr_repository.main.repository_url}:latest"
+      cpu       = 2048
+      memory    = 4098
       essential = true
       portMappings = [
         {
-          containerPort = 80
+          "containerPort" : 80,
+          "hostPort" : 80
         }
       ],
-      mountPoints = [
-        {
-          "sourceVolume" : "training-data-volume",
-          "containerPath" : "/data",
-          "readOnly" : false
-        }
-      ],
+      # mountPoints = [
+      #   {
+      #     "containerPath" : "/data",
+      #     "readOnly" : false
+      #   }
+      # ],
       logConfiguration = {
         options = {
           "awslogs-region"        = "ap-northeast-1"
@@ -120,10 +117,6 @@ resource "aws_ecs_task_definition" "service" {
       }
     }
   ])
-  volume {
-    name      = "training-data-volume"
-    host_path = "/ecs/training-data"
-  }
 }
 
 # ECS Service

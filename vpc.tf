@@ -18,40 +18,52 @@ resource "aws_subnet" "private1a" {
 
 # S3 Endpoint
 resource "aws_vpc_endpoint" "s3" {
-  vpc_id             = aws_vpc.main.id
-  service_name       = "com.amazonaws.${var.aws_region}.s3"
-  security_group_ids = [aws_security_group.vpc_endpoint.id]
+  vpc_id       = aws_vpc.main.id
+  service_name = "com.amazonaws.${var.aws_region}.s3"
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action    = "*"
+        Effect    = "Allow"
+        Resource  = "*"
+        Principal = "*"
+      }
+    ]
+  })
 }
 
 # Route Table
 resource "aws_route_table" "main" {
   vpc_id = aws_vpc.main.id
-  route {
-    destination_prefix_list_id = aws_vpc_endpoint.s3.prefix_list_id
-  }
+  #route {
+    #cidr_block      = "10.0.1.0/24"
+    # vpc_endpoint_id = aws_vpc_endpoint.s3.id
+    #gateway_id      = "local"
+    # depends_on = [aws_vpc_endpoint.s3]
+  #}
 }
 
 # Route Table Association
-resource "aws_vpc_endpoint_route_table_association" "example" {
-  route_table_id  = aws_route_table.main.id
+resource "aws_vpc_endpoint_route_table_association" "main" {
   vpc_endpoint_id = aws_vpc_endpoint.s3.id
+  route_table_id  = aws_route_table.main.id
 }
 
 # ECR Endpoint
 resource "aws_vpc_endpoint" "ecr_dkr" {
-  vpc_id              = aws_vpc.main.id
-  service_name        = "com.amazonaws.${var.aws_region}.ecr.dkr"
-  vpc_endpoint_type   = "Interface"
-  subnet_ids          = [aws_subnet.private1a.id]
-  security_group_ids  = [aws_security_group.vpc_endpoint.id]
-  private_dns_enabled = true
+  vpc_id             = aws_vpc.main.id
+  service_name       = "com.amazonaws.${var.aws_region}.ecr.dkr"
+  vpc_endpoint_type  = "Interface"
+  subnet_ids         = [aws_subnet.private1a.id]
+  security_group_ids = [aws_security_group.vpc_endpoint.id]
 }
 
 resource "aws_vpc_endpoint" "ecr_api" {
-  vpc_id              = aws_vpc.main.id
-  service_name        = "com.amazonaws.${var.aws_region}.ecr.api"
-  vpc_endpoint_type   = "Interface"
-  subnet_ids          = [aws_subnet.private1a.id]
-  security_group_ids  = [aws_security_group.vpc_endpoint.id]
-  private_dns_enabled = true
+  vpc_id             = aws_vpc.main.id
+  service_name       = "com.amazonaws.${var.aws_region}.ecr.api"
+  vpc_endpoint_type  = "Interface"
+  subnet_ids         = [aws_subnet.private1a.id]
+  security_group_ids = [aws_security_group.vpc_endpoint.id]
 }
+

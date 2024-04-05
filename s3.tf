@@ -1,5 +1,5 @@
 # Bucket to save CIFAR-10 dataset
-resource "aws_s3_bucket" "main" {
+resource "aws_s3_bucket" "dataset" {
   bucket = "${var.project_name}-bucket"
 }
 
@@ -12,7 +12,7 @@ data "aws_iam_policy_document" "bucket_policy" {
       "s3:DeleteObject"
     ]
     resources = [
-      "${aws_s3_bucket.main.arn}/*"
+      "${aws_s3_bucket.dataset.arn}/*"
     ]
     principals {
       type        = "AWS"
@@ -22,7 +22,7 @@ data "aws_iam_policy_document" "bucket_policy" {
 }
 
 resource "aws_s3_bucket_policy" "bucket_policy" {
-  bucket = aws_s3_bucket.main.id
+  bucket = aws_s3_bucket.dataset.id
   policy = data.aws_iam_policy_document.bucket_policy.json
 }
 

@@ -1,9 +1,11 @@
-name: "Terraform Plan"
 # Execute terraform plan when changes are pushed to main branch
 # ToDo change to pull request
+
+name: "Terraform Plan"
 on:
   push:
-    branches: [main]
+    branches: main
+  pull_request:
 env:
   TF_VERSION: 1.6.5
   AWS_REGION: ap-northeast-1
@@ -12,9 +14,9 @@ jobs:
   terraform:
     name: terraform
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        workdir: [cifar10-aws/main]
+    # strategy:
+    #   matrix:
+    #     workdir: [cifar10-aws/main]
     permissions:
       id-token: write
       contents: write

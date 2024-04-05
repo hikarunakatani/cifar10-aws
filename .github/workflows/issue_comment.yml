@@ -1,5 +1,6 @@
-name: "Learning GitHub Script"
 # Add a thank you message when issues are opened
+
+name: "Learning GitHub Script"
 on:
   issues:
     types: [opened]

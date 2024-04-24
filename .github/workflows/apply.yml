@@ -56,4 +56,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         # Make apply results comment on commit 
-        run: tfcmt apply -patch -- terraform apply -auto-approve -no-color -input=false
+        run: tfcmt apply -- terraform apply -auto-approve -no-color -input=false

@@ -1,6 +1,5 @@
-# Add a thank you message when issues are opened
-
 name: "Learning GitHub Script"
+# Add a thank you message when issues are opened
 on:
   issues:
     types: [opened]

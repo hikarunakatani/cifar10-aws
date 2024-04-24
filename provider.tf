@@ -6,11 +6,5 @@ terraform {
       version = "~> 5.7.0"
     }
   }
-  backend "s3" {
-    bucket = "terraform-state-nakatani"
-    region = "ap-northeast-1"
-    key = "terraform.tfstate"
-    encrypt = true
-  }
 }
 

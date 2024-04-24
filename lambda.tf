@@ -12,7 +12,7 @@ resource "aws_iam_role" "lambda_execution_role" {
     }]
   })
   inline_policy {
-    name = "lambda_execution_policy"
+    name = "my_inline_policy"
     policy = jsonencode({
       "Version" : "2012-10-17",
       "Statement" : [

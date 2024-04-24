@@ -47,8 +47,10 @@ jobs:
 
       - name: Terraform init
         run: terraform init
+
       - name: Terraform fmt
         run: terraform fmt
+        
       - name: Terraform apply
         id: apply
         env:

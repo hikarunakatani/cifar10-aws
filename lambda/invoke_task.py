@@ -18,7 +18,7 @@ logger.setLevel(logging.INFO)
 ecs = boto3.client("ecs")
 
 
-def run_ecs_task(cluster, task_definition, subnets, security_groups, payload):
+def run_ecs_task(cluster, task_definition, subnets, security_groups):
     """
     Function to run an ECS task.
 
@@ -27,7 +27,6 @@ def run_ecs_task(cluster, task_definition, subnets, security_groups, payload):
     task_definition (str): The ARN of the task definition.
     subnets (str): The subnets for the task.
     security_groups (str): The security groups for the task.
-    payload (dict): The payload for the task.
 
     Returns:
     None
@@ -37,24 +36,13 @@ def run_ecs_task(cluster, task_definition, subnets, security_groups, payload):
             cluster=cluster,
             taskDefinition=task_definition,
             launchType="FARGATE",
+            count=1,
             networkConfiguration={
                 "awsvpcConfiguration": {
                     "subnets": subnets.split(","),
                     "securityGroups": security_groups.split(","),
                     "assignPublicIp": "ENABLED",
                 }
-            },
-            overrides={
-                "containerOverrides": [
-                    {
-                        "name": "sample-ecr-dev",
-                        "command": ["python", "sample.py"],
-                        "memory": 128,
-                        "environment": [
-                            {"name": "PARAMS", "value": json.dumps(payload)}
-                        ],
-                    }
-                ]
             },
         )
         logger.info(f"Response: {response}")
@@ -82,16 +70,16 @@ def lambda_handler(event, context):
         AWSVPC_CONF_SUBNETS = os.environ["AWSVPC_CONF_SUBNETS"]
         AWSVPC_CONF_SECURITY_GROUPS = os.environ["AWSVPC_CONF_SECURITY_GROUPS"]
 
-        for record in event["Records"]:
-            payload = json.loads(record["body"])
-            logger.info(f"ECS_CLUSTER: {ECS_CLUSTER}")
-            logger.info(f"TASK_DEFINITION_ARN: {TASK_DEFINITION_ARN}")
-            run_ecs_task(
-                ECS_CLUSTER,
-                TASK_DEFINITION_ARN,
-                AWSVPC_CONF_SUBNETS,
-                AWSVPC_CONF_SECURITY_GROUPS,
-                payload,
-            )
+        # for record in event["Records"]:
+        # payload = json.loads(record["body"])
+        logger.info(f"ECS_CLUSTER: {ECS_CLUSTER}")
+        logger.info(f"TASK_DEFINITION_ARN: {TASK_DEFINITION_ARN}")
+        run_ecs_task(
+            ECS_CLUSTER,
+            TASK_DEFINITION_ARN,
+            AWSVPC_CONF_SUBNETS,
+            AWSVPC_CONF_SECURITY_GROUPS,
+            # payload,
+        )
     except Exception as e:
         logger.error(f"Lambda handler error: {e}")

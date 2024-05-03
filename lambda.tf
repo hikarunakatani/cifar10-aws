@@ -22,10 +22,12 @@ resource "aws_iam_role" "lambda_execution_role" {
             "ecr:GetAuthorizationToken",
             "ecr:BatchCheckLayerAvailability",
             "ecr:GetDownloadUrlForLayer",
+            "ecs:RunTask",
             "ecr:BatchGetImage",
             "logs:CreateLogGroup",
             "logs:CreateLogStream",
-            "logs:PutLogEvents"
+            "logs:PutLogEvents",
+            "iam:PassRole"
           ],
           "Resource" : "*"
         }
@@ -51,6 +53,14 @@ resource "aws_lambda_function" "invoke_task" {
   handler          = "invoke_task.lambda_handler"
   source_code_hash = data.archive_file.lambda.output_base64sha256
   runtime          = "python3.9"
+  environment {
+    variables = {
+      ECS_CLUSTER = aws_ecs_cluster.main.name
+      TASK_DEFINITION_ARN = aws_ecs_task_definition.main.arn
+      AWSVPC_CONF_SUBNETS = "${aws_subnet.private1a.id}"
+      AWSVPC_CONF_SECURITY_GROUPS = "${aws_security_group.ecs.id}"
+    }
+  }
 }
 
 # Allow EventBridge operations

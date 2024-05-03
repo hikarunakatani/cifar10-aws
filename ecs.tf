@@ -79,7 +79,7 @@ resource "aws_iam_role" "ecs_task_role" {
 }
 
 # Task Definition
-resource "aws_ecs_task_definition" "service" {
+resource "aws_ecs_task_definition" "main" {
   family                   = "${var.project_name}-task"
   requires_compatibilities = ["FARGATE"]
   network_mode             = "awsvpc"
@@ -117,33 +117,4 @@ resource "aws_ecs_task_definition" "service" {
       }
     }
   ])
-}
-
-# ECS Service
-resource "aws_ecs_service" "main" {
-  capacity_provider_strategy {
-    capacity_provider = "FARGATE"
-    base              = 0
-    weight            = 100
-  }
-  cluster                            = aws_ecs_cluster.main.id
-  platform_version                   = "LATEST"
-  task_definition                    = aws_ecs_task_definition.service.id
-  name                               = "${var.project_name}-service"
-  desired_count                      = 1
-  deployment_minimum_healthy_percent = 100
-  deployment_maximum_percent         = 200
-  deployment_circuit_breaker {
-    enable   = true
-    rollback = true
-  }
-  network_configuration {
-    subnets = [
-      "${aws_subnet.private1a.id}",
-    ]
-    security_groups = [
-      "${aws_security_group.ecs.id}"
-    ]
-    assign_public_ip = true
-  }
 }

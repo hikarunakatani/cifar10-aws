@@ -7,9 +7,9 @@ terraform {
     }
   }
   backend "s3" {
-    bucket = "terraform-state-nakatani"
-    region = "ap-northeast-1"
-    key = "terraform.tfstate"
+    bucket  = "terraform-state-nakatani"
+    region  = "ap-northeast-1"
+    key     = "terraform.tfstate"
     encrypt = true
   }
 }

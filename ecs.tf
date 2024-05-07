@@ -16,13 +16,14 @@ resource "aws_ecs_cluster" "main" {
   }
 }
 
-resource "aws_ecs_cluster_capacity_providers" "this" {
-  cluster_name       = aws_ecs_cluster.main.name
-  capacity_providers = ["FARGATE"]
-  default_capacity_provider_strategy {
-    capacity_provider = "FARGATE"
-  }
-}
+# May delete later
+# resource "aws_ecs_cluster_capacity_providers" "this" {
+#   cluster_name       = aws_ecs_cluster.main.name
+#   capacity_providers = ["FARGATE"]
+#   default_capacity_provider_strategy {
+#     capacity_provider = "FARGATE"
+#   }
+# }
 
 resource "aws_iam_role" "ecs_task_exec" {
   name = "ecs_task_exec"
@@ -41,11 +42,31 @@ resource "aws_iam_role" "ecs_task_exec" {
   ]
 }
 
-# ECS Service
-resource "aws_cloudwatch_log_group" "main" {
-  name = "${var.project_name}-log-group"
+# Required to acces to ECR repository from VPC Endpoint
+resource "aws_iam_policy" "s3_access_policy" {
+  name = "s3-access-policy"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Action = [
+        "s3:GetObject",
+        "s3:ListBucket"
+      ]
+      Resource = [
+        "arn:aws:s3:::prod-${var.aws_region}-starport-layer-bucket/*"
+      ]
+    }]
+  })
 }
 
+resource "aws_iam_role_policy_attachment" "s3_access_policy_attachment" {
+  role       = aws_iam_role.ecs_task_exec.name
+  policy_arn = aws_iam_policy.s3_access_policy.arn
+}
+
+# ECS Service
 resource "aws_iam_role" "ecs_task_role" {
   name = "ecs_task_role"
   assume_role_policy = jsonencode({
@@ -117,4 +138,8 @@ resource "aws_ecs_task_definition" "main" {
       }
     }
   ])
+}
+
+resource "aws_cloudwatch_log_group" "main" {
+  name = "${var.project_name}-log-group"
 }

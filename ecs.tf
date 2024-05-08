@@ -16,15 +16,6 @@ resource "aws_ecs_cluster" "main" {
   }
 }
 
-# May delete later
-# resource "aws_ecs_cluster_capacity_providers" "this" {
-#   cluster_name       = aws_ecs_cluster.main.name
-#   capacity_providers = ["FARGATE"]
-#   default_capacity_provider_strategy {
-#     capacity_provider = "FARGATE"
-#   }
-# }
-
 resource "aws_iam_role" "ecs_task_exec" {
   name = "ecs_task_exec"
   assume_role_policy = jsonencode({
@@ -51,8 +42,7 @@ resource "aws_iam_policy" "s3_access_policy" {
     Statement = [{
       Effect = "Allow"
       Action = [
-        "s3:GetObject",
-        "s3:ListBucket"
+        "s3:GetObject"
       ]
       Resource = [
         "arn:aws:s3:::prod-${var.aws_region}-starport-layer-bucket/*"
@@ -122,12 +112,6 @@ resource "aws_ecs_task_definition" "main" {
           "hostPort" : 80
         }
       ],
-      # mountPoints = [
-      #   {
-      #     "containerPath" : "/data",
-      #     "readOnly" : false
-      #   }
-      # ],
       logConfiguration = {
         options = {
           "awslogs-region"        = "ap-northeast-1"

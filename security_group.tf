@@ -3,6 +3,13 @@ resource "aws_security_group" "ecs" {
   vpc_id      = aws_vpc.main.id
   name        = "${var.project_name}-ecs-securitygroup"
   description = "Security group for training task"
+
+  egress {
+    from_port       = 443
+    to_port         = 443
+    protocol        = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+}
 }
 
 # Security group for VPC Endpoint
@@ -15,6 +22,6 @@ resource "aws_security_group" "vpc_endpoint" {
     from_port       = 443
     to_port         = 443
     protocol        = "tcp"
-    security_groups = [aws_security_group.ecs.id]
+    cidr_blocks = [aws_subnet.private1a.cidr_block]
   }
 }

@@ -5,6 +5,7 @@ resource "aws_ecr_repository" "main" {
   image_scanning_configuration {
     scan_on_push = true
   }
+  force_delete = true
 }
 
 # ECS cluster
@@ -15,15 +16,6 @@ resource "aws_ecs_cluster" "main" {
     value = "enabled"
   }
 }
-
-# May delete later
-# resource "aws_ecs_cluster_capacity_providers" "this" {
-#   cluster_name       = aws_ecs_cluster.main.name
-#   capacity_providers = ["FARGATE"]
-#   default_capacity_provider_strategy {
-#     capacity_provider = "FARGATE"
-#   }
-# }
 
 resource "aws_iam_role" "ecs_task_exec" {
   name = "ecs_task_exec"
@@ -40,6 +32,21 @@ resource "aws_iam_role" "ecs_task_exec" {
   managed_policy_arns = [
     "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
   ]
+  inline_policy {
+    name = "allow_logs"
+    policy = jsonencode({
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Effect = "Allow"
+          Action = [
+            "logs:CreateLogGroup"
+          ],
+          Resource = "*"
+        }
+      ]
+    })
+  }
 }
 
 # Required to acces to ECR repository from VPC Endpoint
@@ -51,8 +58,7 @@ resource "aws_iam_policy" "s3_access_policy" {
     Statement = [{
       Effect = "Allow"
       Action = [
-        "s3:GetObject",
-        "s3:ListBucket"
+        "s3:GetObject"
       ]
       Resource = [
         "arn:aws:s3:::prod-${var.aws_region}-starport-layer-bucket/*"
@@ -122,24 +128,15 @@ resource "aws_ecs_task_definition" "main" {
           "hostPort" : 80
         }
       ],
-      # mountPoints = [
-      #   {
-      #     "containerPath" : "/data",
-      #     "readOnly" : false
-      #   }
-      # ],
       logConfiguration = {
         options = {
+          "awslogs-create-group": "true",  
           "awslogs-region"        = "ap-northeast-1"
-          "awslogs-group"         = "aws_cloudwatch_log_group.main.name"
+          "awslogs-group"         = "${var.project_name}-log-group"
           "awslogs-stream-prefix" = "ecs"
         }
         logDriver = "awslogs"
       }
     }
   ])
-}
-
-resource "aws_cloudwatch_log_group" "main" {
-  name = "${var.project_name}-log-group"
 }

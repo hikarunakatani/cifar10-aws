@@ -74,4 +74,5 @@ resource "aws_vpc_endpoint" "logs" {
   vpc_endpoint_type   = "Interface"
   subnet_ids          = [aws_subnet.private1a.id]
   security_group_ids  = [aws_security_group.vpc_endpoint.id]
+  private_dns_enabled = true
 }

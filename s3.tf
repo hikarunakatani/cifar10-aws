@@ -1,6 +1,13 @@
 # Bucket to save CIFAR-10 dataset
 resource "aws_s3_bucket" "dataset" {
   bucket = "${var.project_name}-bucket"
+  force_destroy = true
+}
+
+resource "aws_s3_object" "example" {
+  key        = "training_data"
+  bucket     = aws_s3_bucket.dataset.id
+  source     = "cifar10.zip"
 }
 
 data "aws_iam_policy_document" "bucket_policy" {

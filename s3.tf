@@ -1,6 +1,7 @@
 # Bucket to save CIFAR-10 dataset
 resource "aws_s3_bucket" "dataset" {
   bucket = "${var.project_name}-bucket"
+  force_destroy = true
 }
 
 data "aws_iam_policy_document" "bucket_policy" {
@@ -16,7 +17,7 @@ data "aws_iam_policy_document" "bucket_policy" {
     ]
     principals {
       type        = "AWS"
-      identifiers = [aws_iam_role.ecs_task_exec.arn]
+      identifiers = [aws_iam_role.ecs_task_exec.arn, aws_iam_role.ecs_task_role.arn]
     }
   }
 }

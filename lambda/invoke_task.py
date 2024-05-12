@@ -70,8 +70,7 @@ def lambda_handler(event, context):
         AWSVPC_CONF_SUBNETS = os.environ["AWSVPC_CONF_SUBNETS"]
         AWSVPC_CONF_SECURITY_GROUPS = os.environ["AWSVPC_CONF_SECURITY_GROUPS"]
 
-        # for record in event["Records"]:
-        # payload = json.loads(record["body"])
+
         logger.info(f"ECS_CLUSTER: {ECS_CLUSTER}")
         logger.info(f"TASK_DEFINITION_ARN: {TASK_DEFINITION_ARN}")
         run_ecs_task(
@@ -79,7 +78,6 @@ def lambda_handler(event, context):
             TASK_DEFINITION_ARN,
             AWSVPC_CONF_SUBNETS,
             AWSVPC_CONF_SECURITY_GROUPS,
-            # payload,
         )
     except Exception as e:
         logger.error(f"Lambda handler error: {e}")

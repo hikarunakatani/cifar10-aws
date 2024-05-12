@@ -40,7 +40,8 @@ resource "aws_iam_role" "ecs_task_exec" {
         {
           Effect = "Allow"
           Action = [
-            "logs:CreateLogGroup"
+            "logs:CreateLogGroup",
+            "s3:GetObject"
           ],
           Resource = "*"
         }
@@ -61,7 +62,8 @@ resource "aws_iam_policy" "s3_access_policy" {
         "s3:GetObject"
       ]
       Resource = [
-        "arn:aws:s3:::prod-${var.aws_region}-starport-layer-bucket/*"
+        "arn:aws:s3:::prod-${var.aws_region}-starport-layer-bucket/*",
+        "arn:aws:s3:::cifar10-mlops-bucket/*"
       ]
     }]
   })
@@ -72,7 +74,7 @@ resource "aws_iam_role_policy_attachment" "s3_access_policy_attachment" {
   policy_arn = aws_iam_policy.s3_access_policy.arn
 }
 
-# ECS Service
+# ECS task role
 resource "aws_iam_role" "ecs_task_role" {
   name = "ecs_task_role"
   assume_role_policy = jsonencode({
@@ -97,6 +99,7 @@ resource "aws_iam_role" "ecs_task_role" {
             "logs:DescribeLogGroups",
             "logs:DescribeLogStreams",
             "logs:PutLogEvents",
+            "s3:GetObject"
           ],
           Resource = "*"
         }

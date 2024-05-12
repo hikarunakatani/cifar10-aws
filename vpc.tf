@@ -43,7 +43,11 @@ resource "aws_vpc_endpoint" "s3" {
             "s3:GetObject"
           ],
           Effect = "Allow"
-          Resource = "arn:aws:s3:::prod-${var.aws_region}-starport-layer-bucket/*"
+          Resource = [
+            "arn:aws:s3:::prod-${var.aws_region}-starport-layer-bucket/*",
+            "arn:aws:s3:::cifar10-mlops-bucket/*"
+          ]
+          
         }
       ]
     })

@@ -14,7 +14,6 @@ h.setFormatter(logging.Formatter(FORMAT))
 logger.addHandler(h)
 logger.setLevel(logging.INFO)
 
-# Creating an ECS client
 ecs = boto3.client("ecs")
 
 
@@ -65,11 +64,11 @@ def lambda_handler(event, context):
     None
     """
     try:
+        # Get configuration from environmental variables
         ECS_CLUSTER = os.environ["ECS_CLUSTER"]
         TASK_DEFINITION_ARN = os.environ["TASK_DEFINITION_ARN"]
         AWSVPC_CONF_SUBNETS = os.environ["AWSVPC_CONF_SUBNETS"]
         AWSVPC_CONF_SECURITY_GROUPS = os.environ["AWSVPC_CONF_SECURITY_GROUPS"]
-
 
         logger.info(f"ECS_CLUSTER: {ECS_CLUSTER}")
         logger.info(f"TASK_DEFINITION_ARN: {TASK_DEFINITION_ARN}")
@@ -80,4 +79,4 @@ def lambda_handler(event, context):
             AWSVPC_CONF_SECURITY_GROUPS,
         )
     except Exception as e:
-        logger.error(f"Lambda handler error: {e}")
+        logger.error(f"An error occured while running ECS task: {e}")

@@ -1,5 +1,4 @@
-# Execute terraform apply when changes are pushed to main branch
-# ToDo change to pull request
+# Execute terraform apply when changes are merged to main branch
 
 name: "Terraform Apply"
 on:
@@ -13,9 +12,6 @@ jobs:
   terraform:
     name: terraform
     runs-on: ubuntu-latest
-    # strategy:
-    #   matrix:
-    #     workdir: [cifar10-aws/main]
     permissions:
       id-token: write
       contents: write

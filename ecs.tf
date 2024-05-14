@@ -62,7 +62,7 @@ resource "aws_iam_policy" "s3_access_policy" {
         "s3:GetObject"
       ]
       Resource = [
-        "arn:aws:s3:::prod-${var.aws_region}-starport-layer-bucket/*",
+        "arn:aws:s3:::prod-${var.aws_region}-starport-layer-bucket/*", # Required to access ECR repository
         "arn:aws:s3:::cifar10-mlops-bucket/*"
       ]
     }]

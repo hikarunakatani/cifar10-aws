@@ -1,5 +1,4 @@
-# Execute terraform plan when changes are pushed to main branch
-# ToDo change to pull request
+# Execute terraform plan when pull request gets opened
 
 name: "Terraform Plan"
 on:
@@ -13,9 +12,6 @@ jobs:
   terraform:
     name: terraform
     runs-on: ubuntu-latest
-    # strategy:
-    #   matrix:
-    #     workdir: [cifar10-aws/main]
     permissions:
       id-token: write
       contents: write
